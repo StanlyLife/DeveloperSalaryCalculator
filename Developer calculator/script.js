@@ -39,7 +39,7 @@ GetResponsesBasedOnTypeByGroup("shareSalary","openSalary", GetListOfAnswersFor("
 // console.log("Responses age salary by county");
 // GetResponsesBasedOnTypeByGroup("age","salary", GetListOfAnswersFor("county"));
 // console.log("age salary by county with responses");
-console.log("@@@@@@@@@@");
+console.log("@@@@@@@@@@"); 
 GetAverageNumberValueBasedOnTypeByGroupWithResponses("age","salary", GetListOfAnswersFor("county"), "county");
 GetMeanValueBasedOnTypeByGroupWithResponses("age","salary", GetListOfAnswersFor("county"), "county");
 
@@ -143,7 +143,6 @@ function GetResponsesBasedOnType(name, value, response, arr){
  })
  return result;
 }
-
 function GetListOfAnswersFor(key){
   const unique = [...new Set(DF.map(item => item[key]))];
   let unqiqueObjects = [];
@@ -200,15 +199,14 @@ function GetMeanNumberValueBasedOnType(name, value, responses, arr){
     const reduced = dataArray.reduce(function(m, d){
     if(!m[d[name]]){
       m[d[name]] = {...d, count: 1};
+      m[d[name]]["arr"] = []
       return m;
     }
-    if(!m[d[name]]["arr"]){ m[d[name]]["arr"] = [] }
     m[d[name]][value] += d[value];
     m[d[name]]["arr"].push(d[value]);
     m[d[name]].count += 1;
     return m;
  },{});
-  dataArray.sort((a,b) => (a.salary > b.salary) ? 1 : ((b.salary > a.salary) ? -1 : 0))
   const result = Object.keys(reduced).map(function(k){
     const item  = reduced[k];
     if(!item["arr"]){
