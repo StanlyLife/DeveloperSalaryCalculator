@@ -22,7 +22,7 @@ console.log("type salary");
 console.log(GetAverageNumberValueBasedOnType("type", "salary"));
 console.log("sector salary");
 console.log(GetAverageNumberValueBasedOnType("sector", "salary"));
-GetResponsesBasedOnType("age", "sector");
+var x = GetResponsesBasedOnType("age", "sector");
 console.log("Responses age gender");
 /* 
 age, gender, gender, gender
@@ -37,6 +37,9 @@ GetResponsesBasedOnTypeByGroup("shareSalary","openSalary", GetListOfAnswersFor("
 // GetResponsesBasedOnTypeByGroup("age","salary", GetListOfAnswersFor("county"));
 // console.log("age salary by county with responses");
 // GetAverageNumberValueBasedOnTypeByGroupWithResponses("age","salary", GetListOfAnswersFor("county"), "county");
+
+document.querySelector("#json").textContent  = JSON.stringify(DF, undefined, 2);
+
 function UpdateKeys(){
   DF = data.map(({
     "Hva er din alder?": age,
