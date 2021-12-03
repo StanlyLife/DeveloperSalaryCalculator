@@ -4,12 +4,15 @@ let DF = [];
 
 UpdateKeys();
 UpdateValues();
+FixSalaries();
 console.log("age salary");
 console.log(
   GetAverageNumberValueBasedOnType("age", "salary")
   );
 console.log("bonus salary");
 console.log(GetAverageNumberValueBasedOnType("bonus", "salary"));
+console.log("mean bonus salary");
+console.log(GetMeanNumberValueBasedOnType("bonus", "salary"));
 console.log("Responses bonus");
 console.log(GetResponsesBasedOnType("bonus", ""));
 console.log("Responses developers earn most");
@@ -36,10 +39,20 @@ GetResponsesBasedOnTypeByGroup("shareSalary","openSalary", GetListOfAnswersFor("
 // console.log("Responses age salary by county");
 // GetResponsesBasedOnTypeByGroup("age","salary", GetListOfAnswersFor("county"));
 // console.log("age salary by county with responses");
-// GetAverageNumberValueBasedOnTypeByGroupWithResponses("age","salary", GetListOfAnswersFor("county"), "county");
+console.log("@@@@@@@@@@");
+GetAverageNumberValueBasedOnTypeByGroupWithResponses("age","salary", GetListOfAnswersFor("county"), "county");
+GetMeanValueBasedOnTypeByGroupWithResponses("age","salary", GetListOfAnswersFor("county"), "county");
 
 document.querySelector("#json").textContent  = JSON.stringify(DF, undefined, 2);
-
+function FixSalaries(){
+  var arr = [];
+  DF.forEach(obj => {
+    if(obj.salary > 1000000){
+      arr.push({yoe: obj.yoe, salary: obj.salary});
+    }
+  });
+  arr.sort((a,b) => (a.salary > b.salary) ? 1 : ((b.salary > a.salary) ? -1 : 0))
+}
 function UpdateKeys(){
   DF = data.map(({
     "Hva er din alder?": age,
@@ -130,6 +143,26 @@ function GetResponsesBasedOnType(name, value, response, arr){
  })
  return result;
 }
+
+function GetListOfAnswersFor(key){
+  const unique = [...new Set(DF.map(item => item[key]))];
+  let unqiqueObjects = [];
+  unique.forEach(u => {
+    o = { name : key, value: u}
+    unqiqueObjects.push(o);
+  });
+  return unique;
+}
+function GetListOfAnswersWhereKeyIs(key, value){
+  let ListOfAnswers = [];
+  DF.forEach(u => {
+    if(u[key] == value){
+      ListOfAnswers.push(u);
+    }
+  });
+  return ListOfAnswers;
+}
+//#region ValueBasedOnType
 function GetAverageNumberValueBasedOnType(name, value, responses, arr){
   var dataArray = arr || DF;
 
@@ -161,30 +194,80 @@ function GetAverageNumberValueBasedOnType(name, value, responses, arr){
  })
  return result;
 }
-function GetListOfAnswersFor(key){
-  const unique = [...new Set(DF.map(item => item[key]))];
-  let unqiqueObjects = [];
-  unique.forEach(u => {
-    o = { name : key, value: u}
-    unqiqueObjects.push(o);
-  });
-  return unique;
-}
-function GetListOfAnswersWhereKeyIs(key, value){
-  let ListOfAnswers = [];
-  DF.forEach(u => {
-    if(u[key] == value){
-      ListOfAnswers.push(u);
+
+function GetMeanNumberValueBasedOnType(name, value, responses, arr){
+  var dataArray = arr || DF;
+    const reduced = dataArray.reduce(function(m, d){
+    if(!m[d[name]]){
+      m[d[name]] = {...d, count: 1};
+      return m;
     }
-  });
-  return ListOfAnswers;
+    if(!m[d[name]]["arr"]){ m[d[name]]["arr"] = [] }
+    m[d[name]][value] += d[value];
+    m[d[name]]["arr"].push(d[value]);
+    m[d[name]].count += 1;
+    return m;
+ },{});
+  dataArray.sort((a,b) => (a.salary > b.salary) ? 1 : ((b.salary > a.salary) ? -1 : 0))
+  const result = Object.keys(reduced).map(function(k){
+    const item  = reduced[k];
+    if(!item["arr"]){
+      return;
+    }
+    sortedItemArray = item["arr"].sort();
+    medianValue = sortedItemArray[(sortedItemArray.length/2).toFixed()];
+   if(responses){
+     return {
+         name: item[name] + ` (${item.count})`,
+         value: medianValue,
+         response: item.count
+     }
+   }
+    return {
+        name: item[name],
+        value: medianValue,
+        response: item.count
+    }
+});
+ return result;
 }
+//#endregion
+//#region ValueBasedOnTypeByGroup
 function GetAverageNumberValueBasedOnTypeByGroup(name, value, group){
   series = [];
   group.forEach(g => {
     var serie = GetAverageNumberValueBasedOnType(name, value);
     var input = {
       name: g,
+      series: serie
+    };
+    series.push(input);
+  });
+  console.log(series);
+  return series;
+}
+function GetMeanValueBasedOnTypeByGroup(name, value, group){
+  series = [];
+  group.forEach(g => {
+    var serie = GetMeanNumberValueBasedOnType(name, value);
+    var input = {
+      name: g,
+      series: serie
+    };
+    series.push(input);
+  });
+  console.log(series);
+  return series;
+}
+//#endregion
+//#region BasedOnTypeByGroupWithResponses
+function GetMeanValueBasedOnTypeByGroupWithResponses(name, value, group, groupName){
+  series = [];
+  group.forEach(g => {
+    var groupedResponses = GetListOfAnswersWhereKeyIs(groupName, g);
+    var serie = GetMeanNumberValueBasedOnType(name, value, true, groupedResponses);
+    var input = {
+      name: g + ` (${groupedResponses.length})`,
       series: serie
     };
     series.push(input);
@@ -206,6 +289,7 @@ function GetAverageNumberValueBasedOnTypeByGroupWithResponses(name, value, group
   console.log(series);
   return series;
 }
+//#endregion
 function GetResponsesBasedOnTypeByGroup(name, value, group, groupName){
   series = [];
   group.forEach(g => {
