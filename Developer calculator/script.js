@@ -47,11 +47,12 @@ document.querySelector("#json").textContent  = JSON.stringify(DF, undefined, 2);
 function FixSalaries(){
   var arr = [];
   DF.forEach(obj => {
-    if(obj.salary > 1000000){
-      arr.push({yoe: obj.yoe, salary: obj.salary});
-    }
+      if (obj.salary < 2000000 && obj.salary > 300000) {
+        arr.push({ ...obj });
+      }
   });
   arr.sort((a,b) => (a.salary > b.salary) ? 1 : ((b.salary > a.salary) ? -1 : 0))
+  DF = arr;
 }
 function UpdateKeys(){
   DF = data.map(({
