@@ -70,6 +70,7 @@ function FixSalaries(){
   arr.sort((a, b) =>
     a.salary > b.salary ? 1 : b.salary > a.salary ? -1 : 0
   );
+
   DF = arr;
 }
 function UpdateKeys(){
@@ -352,3 +353,4 @@ function GetResponsesBasedOnTypeSplit(name, value, response, arr) {
   );
   return results;
 }
+
