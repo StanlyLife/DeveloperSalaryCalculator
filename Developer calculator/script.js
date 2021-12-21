@@ -27,6 +27,15 @@ console.log("sector salary");
 console.log(GetAverageNumberValueBasedOnType("sector", "salary"));
 var x = GetResponsesBasedOnType("age", "sector");
 console.log("Responses age gender");
+console.log("RespondantsGoods");
+var RespondantsGoods = GetResponsesBasedOnTypeSplit(
+  'goods',
+  '',
+  null,
+  null
+);
+console.log(RespondantsGoods);
+
 /* 
 age, gender, gender, gender
 1: Gender answer: enig/uenig
@@ -34,24 +43,34 @@ age, gender, gender, gender
     3: Amount that has answer 1
 */
 GetResponsesBasedOnTypeByGroup("shareSalary","openSalary", GetListOfAnswersFor("openSalary"), "openSalary");
-// console.log("age salary by county");
-// GetAverageNumberValueBasedOnTypeByGroup("age","salary", GetListOfAnswersFor("county"));
+console.log("YOE");
+// GetAverageNumberValueBasedOnTypeByGroup("yoe","salary", GetListOfAnswersFor("age"));
 // console.log("Responses age salary by county");
 // GetResponsesBasedOnTypeByGroup("age","salary", GetListOfAnswersFor("county"));
 // console.log("age salary by county with responses");
+GetAverageNumberValueBasedOnTypeByGroupWithResponses("yoe","salary", GetListOfAnswersFor("age"), "age");
 console.log("@@@@@@@@@@"); 
-GetAverageNumberValueBasedOnTypeByGroupWithResponses("age","salary", GetListOfAnswersFor("county"), "county");
 GetMeanValueBasedOnTypeByGroupWithResponses("age","salary", GetListOfAnswersFor("county"), "county");
 
 document.querySelector("#json").textContent  = JSON.stringify(DF, undefined, 2);
 function FixSalaries(){
+  // var arr = [];
+  // DF.forEach(obj => {
+  //   if(obj.salary < 2000000 && obj.salary < 300000){
+  //     arr.push({yoe: obj.yoe, salary: obj.salary});
+  //   }
+  // });
+  // arr.sort((a,b) => (a.salary > b.salary) ? 1 : ((b.salary > a.salary) ? -1 : 0))
   var arr = [];
-  DF.forEach(obj => {
-    if(obj.salary > 1000000){
-      arr.push({yoe: obj.yoe, salary: obj.salary});
+  DF.forEach((obj) => {
+    if (obj.salary < 2000000 && obj.salary > 300000) {
+      arr.push({ ...obj });
     }
   });
-  arr.sort((a,b) => (a.salary > b.salary) ? 1 : ((b.salary > a.salary) ? -1 : 0))
+  arr.sort((a, b) =>
+    a.salary > b.salary ? 1 : b.salary > a.salary ? -1 : 0
+  );
+  DF = arr;
 }
 function UpdateKeys(){
   DF = data.map(({
@@ -301,4 +320,35 @@ function GetResponsesBasedOnTypeByGroup(name, value, group, groupName){
   });
   console.log(series);
   return series;
+}
+
+function GetResponsesBasedOnTypeSplit(name, value, response, arr) {
+  var dataArray = DF;
+
+  var results = [];
+  dataArray.forEach((obj) => {
+    let valg = obj[name].split(',');
+    var path = valg.map((x) => x.trim());
+    path.forEach((v) => {
+      var found = false;
+      for (var i = 0; i < results.length; i++) {
+        if (results[i].name == v) {
+          results[i].value++;
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        var o = { name: v, value: 1 };
+        results.push(o);
+      }
+    });
+  });
+  results = results.filter(function (obj) {
+    return obj.value > 5;
+  });
+  results.sort((a, b) =>
+    a.value > b.value ? 1 : b.value > a.value ? -1 : 0
+  );
+  return results;
 }
